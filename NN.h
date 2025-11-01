@@ -18,7 +18,7 @@ class nearest_neighbor{
     nearest_neighbor() : num_trees(0) {}
     //void get_data(double graph_data[][2], int points); 
     int get_numTrees() const { return num_trees; }
-    const void get_route();  
+    vector<int> get_route() const;  
     void load_data(const string &filename);
     double nearest_neighbor_distance();    
     double euclidean(int i, int j);
@@ -26,10 +26,8 @@ class nearest_neighbor{
 
     //void nearest_neighbor_route(double coordinates[][2], int n, const int route[]);
 };   
-const void nearest_neighbor::get_route()   {
-    for(int i = 0; i < num_trees; ++i)  {
-        cout << route[i] << endl;
-    }
+vector<int> nearest_neighbor::get_route() const  {
+    return vector<int>(route, route + num_trees + 1);
 }
 void nearest_neighbor::load_data(const string &filename) {
         ifstream dataPoints;
@@ -106,15 +104,14 @@ void nearest_neighbor::write_route_to_file(const string &filename) {
         return;
     }
 
-    for (int i = 0; i <= num_trees; ++i) { // include return to start
-        int idx = route[i];
-        fout << round(coordinates[idx][0]) << " " << round(coordinates[idx][1]) << endl;
+    vector<int> r = get_route(); // get the route vector
+    for (int node : r) {         // iterate over the vector
+        fout << node << endl;
     }
     
     fout.close();
-    cout << "Route written to " << filename << endl;
+    cout << "Route written to disk as " << filename << endl;
 }
-
     // double  nearest_neighbor::nearest_neighbor_distance()  {
     //     bool visited[256];
     //     double total_distance = 0.0;
