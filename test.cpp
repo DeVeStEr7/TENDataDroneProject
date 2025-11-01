@@ -11,6 +11,8 @@
 #include <chrono>
 #include <iomanip>
 #include <algorithm>
+#include <conio.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -95,9 +97,11 @@ int main() {
 			BSF = new_distance;
 			cout << "		" << BSF << endl;
 		}
-		if(cin.peek() == '\n'){
-			cin.get();
-			break;
+		if(_kbhit()){
+			char c = _getch();
+			if(c == '\r'){
+				break;
+			}
 		}
 	}
 	
