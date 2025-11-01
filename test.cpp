@@ -14,15 +14,15 @@
 
 using namespace std;
 
-struct Interrupt {
-	Interrupt() : interrupted(false) {};
-	void continueSystem() {
-		while(!interrupted) {
-			//keep running
-		}
-	}
-	atomic<bool> interrupted;
-};
+// struct Interrupt {
+// 	Interrupt() : interrupted(false) {};
+// 	void continueSystem() {
+// 		while(!interrupted) {
+// 			//keep running
+// 		}
+// 	}
+// 	atomic<bool> interrupted;
+// };
 
 int numberCountThrough(vector<double> xCoords, vector<double> yCoords) {
 	int sum = 0;
@@ -49,7 +49,8 @@ int main() {
 	ofstream outFS;
 	vector<double> xCoords;
 	vector<double> yCoords;
-
+	double p = 0.10;
+	
 	cout << "Please input a filename: ";
 	cin >> filename;
 
@@ -77,26 +78,34 @@ int main() {
 	inFS.close();
 	
 	cout << "There are " << xCoords.size() << " nodes, computing route..." << endl;
-	cout << "   Shortest Route Discovered So Far" << endl;
+	cout << "	Shortest Route Discovered So Far" << endl;
 
 	double distance = 0.0;
 	nearest_neighbor drone;
 	drone.load_data(filename);
 	distance = round(drone.nearest_neighbor_distance()*10)/10;
-	cout << "       " << distance << endl;
-
-    ostringstream dist;
-    dist << fixed << setprecision(0) << distance;
-	string outputFilename = filename + "_SOLUTION_" + dist.str() + ".txt";
-	drone.write_route_to_file(outputFilename);
-
+	cout << "		" << distance << endl;
+	double BSF = distance;
+    
+	cin.ignore();
+	srand(time(NULL));
+	while(true){
+		double new_distance = round(drone.modified_nearest_neighbor_distance(p)*10)/10;
+		if(new_distance < BSF){
+			BSF = new_distance;
+			cout << "		" << BSF << endl;
+		}
+		if(cin.peek() == '\n'){
+			cin.get();
+			break;
+		}
+	}
 	
 
-	
 	// Interrupt interrupt;
 	// thread t(&Interrupt::continueSystem, &interrupt);
-	// cin.ignore(); //clear the newline character from the input buffer
-	// char c;
+	//cin.ignore(); //clear the newline character from the input buffer
+	//char c;
 
 
 	// while((c = getchar()) != '\n') {
@@ -105,9 +114,15 @@ int main() {
 	// interrupt.interrupted = true;
 	// t.join();
 
+	ostringstream dist;
+    dist << fixed << setprecision(0) << BSF;
+	string outputFilename = filename + "_SOLUTION_" + dist.str() + ".txt";
+	drone.write_route_to_file(outputFilename);
+
     signalsmith::plot::Plot2D plot;
     vector<int> route = drone.get_route();
 
+    
 	auto &line = plot.line();
 	for (int x = 0; x < route.size(); ++x) {
         int i = route[x];

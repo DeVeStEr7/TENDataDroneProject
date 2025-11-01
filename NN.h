@@ -23,7 +23,7 @@ class nearest_neighbor{
     double nearest_neighbor_distance();    
     double euclidean(int i, int j);
     void write_route_to_file(const string& filename);
-
+    double modified_nearest_neighbor_distance(double p);
     //void nearest_neighbor_route(double coordinates[][2], int n, const int route[]);
 };   
 vector<int> nearest_neighbor::get_route() const  {
@@ -112,82 +112,58 @@ void nearest_neighbor::write_route_to_file(const string &filename) {
     fout.close();
     cout << "Route written to disk as " << filename << endl;
 }
-    // double  nearest_neighbor::nearest_neighbor_distance()  {
-    //     bool visited[256];
-    //     double total_distance = 0.0;
-        
-    //     double charge_point[1][2] = {coordinates[0][0], coordinates[0][1]}; //starting point
-    //     double curr_point[2] = {charge_point[0][0], charge_point[0][1]};
-    //     visited[0] = true;
 
-    //     int sprayed = 0;
 
-    //     while(sprayed < num_trees - 1)  {
-    //         double minDist = 1000000;
-    //         int next_tree = -1;
 
-    //         for(int i = 0; i < num_trees; ++i)  {
-    //             if(!visited[i])  {
-    //                 double dist = euclidean(curr_point, coordinates[i]);
-    //                 if(dist < minDist)  {
-    //                     minDist = dist;
-    //                     next_tree = i;
-    //                 }
-    //             }
-    //         }
 
-    //         if(next_tree != -1)  {
-    //             total_distance += minDist;
-    //             curr_point[0] = coordinates[next_tree][0];
-    //             curr_point[1] = coordinates[next_tree][1];
-    //             visited[next_tree] = true;
-    //             sprayed++;
-    //         }
-            
-    //     }
+double nearest_neighbor::modified_nearest_neighbor_distance(double p) {
+    bool visited[256] = {false};
+    double total_distance = 0.0;
+    int current_tree = 0;
+    int temp_route[256];
+    temp_route[0] = current_tree;
+    visited[current_tree] = true;
 
-    //     total_distance += euclidean(curr_point, charge_point[0]);   //return to the start
-    //     return total_distance;
-    // }        
+    for (int i = 1; i < num_trees; ++i) {
+        int bestNextTree1 = -1;  //Indices of the 2 closest trees
+        int bestNextTree2 = -1;
 
-    // void get_data(double graph_data[][2])   {
-    //     if(num_trees < 1)   {
-    //         cout << "No data loaded" << endl;
-    //         return;
-    //     }
-        
-    //     for(int i = 0; i < num_trees; ++i)  {
-    //         coordinates[i][0] = graph_data[i][0];
-    //         coordinates[i][1] = graph_data[i][1];
-    //     }
-    // }
+        double bestDistance = 100000;  //Distance to the 2 closest trees
+        double bestDistance2nd = 100000;
 
-    // double  nearest_neighbor::euclidean(int i, int j){
-    //     double dx = coordinates[i][0] - coordinates[j][0];
-    //     double dy = coordinates[i][1] - coordinates[j][1];
-    //     return sqrt(dx*dx + dy*dy);
-    // }
+        for (int j = 0; j < num_trees; ++j) {
+            if (!visited[j]) {
+                double d = euclidean(current_tree, j);
+                if (d < bestDistance) {
+                    //If we find a closer tree we mpve the current best distance to the 2nd best distance 
+                    bestDistance2nd = bestDistance; 
+                    bestNextTree2 = bestNextTree1;
+                    //and update the best distance
+                    bestDistance = d; 
+                    bestNextTree1 = j;
+                } else if (d < bestDistance2nd) {
+                    bestDistance2nd = d; 
+                    bestNextTree2 = j;
+                }
+            }
+        }
+
+        int next_tree = bestNextTree1;
+        if (bestNextTree2 && ((double)rand() / RAND_MAX) < p)
+            next_tree = bestNextTree2;
+
+        total_distance += euclidean(current_tree, next_tree);
+        temp_route[i] = next_tree;
+        visited[next_tree] = true;
+        current_tree = next_tree;
+    }
+
+    total_distance += euclidean(current_tree, 0);
+    temp_route[num_trees] = 0;
+
+    for (int i = 0; i <= num_trees; ++i){
+        route[i] = temp_route[i];
+    }
     
-    // void  nearest_neighbor::nearest_neighbor_route(){
-    //     bool visited[256] = {false};
-    //     int current_tree = 0;
-    //     route[0] = current_tree;
-    //     visited[current] = true;
-    //     for(int num_visited = 1; num_visited < num_trees; ++num_visited){
-    //         int next_tree = -1;
-    //         double minDistance = 1000000; 
-    //         for (int j = 0; j < num_trees; ++j){
-    //             if(!visited[j]){
-    //                 double dist = euclidean(current_tree, j);
-    //                 if(dist < minDistance){
-    //                     minDistance = d;
-    //                     next_tree = j;
-    //                 }
-    //             }
-    //         }
-
-    //     }
-    //     route[num_visited] = next_tree;
-    //     visited[next_tree] = tree;
-    //     current_tree = next_tree;
-    // }
+    return total_distance;
+}
