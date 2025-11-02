@@ -88,39 +88,16 @@ int main() {
 
 	inFS.open(filename);
 
-	// Error check : file opening
-	if (!inFS.is_open()) {
-		cout << "Could not open file " << filename << endl;
-		return 1;
-	}
-
-	// read data from file and organize into x, y coordinate vectors
-	getline(inFS,inputData);
-
-	string xInput, yInput;
-
-    while(!inFS.fail()) {
-        stringstream ss(inputData);
-        while(ss >> xInput >> yInput) {
-            double normalizeXInput = normalize(xInput);
-			double normalizeYInput = normalize(yInput);
-            xCoords.push_back(normalizeXInput);
-			yCoords.push_back(normalizeYInput);
-        }
-        getline(inFS,inputData);
-    }
-
-	inFS.close();
-	
-	// prints to UI
-	cout << "There are " << xCoords.size() << " nodes, computing route..." << endl;
-	cout << "	Shortest Route Discovered So Far" << endl;
-
 	// variable initialization
 	double distance = 0.0;
 	nearest_neighbor drone;
 	drone.load_data(filename); // re reads info 
 	distance = round(drone.nearest_neighbor_distance()*10)/10;
+
+	// prints to UI
+	cout << "There are " << drone.get_size() << " nodes, computing route..." << endl;
+	cout << "	Shortest Route Discovered So Far" << endl;
+
 	cout << "		" << distance << endl;
 	double BSF = distance;
     

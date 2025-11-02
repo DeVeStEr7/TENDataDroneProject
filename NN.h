@@ -25,7 +25,8 @@ class nearest_neighbor{
     void write_route_to_file(const string& filename);
     double modified_nearest_neighbor_distance(double p);
     //void nearest_neighbor_route(double coordinates[][2], int n, const int route[]);
-    
+    int get_size() const { return num_trees; }
+
 };   
 vector<int> nearest_neighbor::get_route() const  {
     return vector<int>(route, route + num_trees + 1);
