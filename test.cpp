@@ -16,16 +16,6 @@
 
 using namespace std;
 
-// struct Interrupt {
-// 	Interrupt() : interrupted(false) {};
-// 	void continueSystem() {
-// 		while(!interrupted) {
-// 			//keep running
-// 		}
-// 	}
-// 	atomic<bool> interrupted;
-// };
-
 #ifdef _WIN32
     #include <conio.h>    // for _kbhit() and _getch() on Windows
 #else
@@ -88,39 +78,16 @@ int main() {
 
 	inFS.open(filename);
 
-	// Error check : file opening
-	if (!inFS.is_open()) {
-		cout << "Could not open file " << filename << endl;
-		return 1;
-	}
-
-	// read data from file and organize into x, y coordinate vectors
-	getline(inFS,inputData);
-
-	string xInput, yInput;
-
-    while(!inFS.fail()) {
-        stringstream ss(inputData);
-        while(ss >> xInput >> yInput) {
-            double normalizeXInput = normalize(xInput);
-			double normalizeYInput = normalize(yInput);
-            xCoords.push_back(normalizeXInput);
-			yCoords.push_back(normalizeYInput);
-        }
-        getline(inFS,inputData);
-    }
-
-	inFS.close();
-	
-	// prints to UI
-	cout << "There are " << xCoords.size() << " nodes, computing route..." << endl;
-	cout << "	Shortest Route Discovered So Far" << endl;
-
 	// variable initialization
 	double distance = 0.0;
 	nearest_neighbor drone;
 	drone.load_data(filename); // re reads info 
 	distance = round(drone.nearest_neighbor_distance()*10)/10;
+
+	// prints to UI
+	cout << "There are " << drone.get_size() << " nodes, computing route..." << endl;
+	cout << "	Shortest Route Discovered So Far" << endl;
+
 	cout << "		" << distance << endl;
 	double BSF = distance;
 	string fileNameAdjusted = " ";;
@@ -137,19 +104,6 @@ int main() {
     if (enterPressed()) break;  // ✅ non-blocking check for Enter key
 
    }
-	
-
-	// Interrupt interrupt;
-	// thread t(&Interrupt::continueSystem, &interrupt);
-	//cin.ignore(); //clear the newline character from the input buffer
-	//char c;
-
-
-	// while((c = getchar()) != '\n') {
-	// 	//checkFastestRoute();
-	// }
-	// interrupt.interrupted = true;
-	// t.join();
 
 	ostringstream dist;
     fileNameAdjusted = filename.substr(0, filename.find('.'));

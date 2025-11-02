@@ -25,47 +25,52 @@ class nearest_neighbor{
     void write_route_to_file(const string& filename);
     double modified_nearest_neighbor_distance(double p);
     //void nearest_neighbor_route(double coordinates[][2], int n, const int route[]);
-    
+    int get_size() const { return num_trees; }
+
 };   
+
+
 vector<int> nearest_neighbor::get_route() const  {
     return vector<int>(route, route + num_trees + 1);
 }
+
+
 void nearest_neighbor::load_data(const string &filename) {
-        ifstream dataPoints;
-        dataPoints.open(filename);
-        if (!dataPoints) {
-            cout << "Error with opening file " << endl;
-            exit(1); 
-        }
-        
-        num_trees = 0;
-        string coordinate_line;
-        while(getline(dataPoints, coordinate_line)) {
-            stringstream ss(coordinate_line);
-            double x, y;
+    ifstream dataPoints;
+    dataPoints.open(filename);
+    if (!dataPoints) {
+        cout << "Error with opening file " << endl;
+        exit(1); 
+    }
+    
+    num_trees = 0;
+    string coordinate_line;
+    while(getline(dataPoints, coordinate_line)) {
+        stringstream ss(coordinate_line);
+        double x, y;
 
-            // Error check : valid file format
-            if (!(ss >> x >> y)) {
-                cout << "Error: Invalid file format" << endl;
-                exit(1);
-            }
-
-            ss >> x >> y;
-            coordinates[num_trees][0] = x;
-            coordinates[num_trees][1] = y;
-            
-            // Error check : valid number of locations
-            if(num_trees > 256) {
-                cout << "Error: number of locations is greater than 256" << endl;
-                exit(1);
-            }
-
-            num_trees++;
+        // Error check : valid file format
+        if (!(ss >> x >> y)) {
+            cout << "Error: Invalid file format" << endl;
+            exit(1);
         }
 
-        dataPoints.close();
+        ss >> x >> y;
+        coordinates[num_trees][0] = x;
+        coordinates[num_trees][1] = y;
         
-    }        
+        // Error check : valid number of locations
+        if(num_trees > 256) {
+            cout << "Error: number of locations is greater than 256" << endl;
+            exit(1);
+        }
+
+        num_trees++;
+    }
+
+    dataPoints.close();
+    
+}        
 
 
 // Euclidean distance between two points by index
@@ -75,6 +80,7 @@ double nearest_neighbor::euclidean(int i, int j) {
     double dy = coordinates[i][1] - coordinates[j][1];
     return sqrt(dx * dx + dy * dy); 
 }
+
 
 // Combined nearest neighbor distance calculation + route generation
 double nearest_neighbor::nearest_neighbor_distance() {
@@ -124,6 +130,7 @@ double nearest_neighbor::nearest_neighbor_distance() {
     return total_distance;
 }
 
+
 void nearest_neighbor::write_route_to_file(const string &filename) {
 
     ofstream fout(filename);
@@ -143,8 +150,6 @@ void nearest_neighbor::write_route_to_file(const string &filename) {
     fout.close();
     cout << "Route written to disk as " << filename << endl;
 }
-
-
 
 
 double nearest_neighbor::modified_nearest_neighbor_distance(double p) {
