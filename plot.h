@@ -43,7 +43,7 @@ public:
 		return style;
 	}
 
-	double scale = 1; ///< scales the entire plot (including adjusting the precision)
+	double scale = 2; ///< scales the entire plot (including adjusting the precision)
 	double padding = 10;
 	double lineWidth = 1.5, precision = 100;
 	double markerSize = 3.25;
