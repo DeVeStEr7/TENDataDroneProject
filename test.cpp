@@ -16,16 +16,6 @@
 
 using namespace std;
 
-// struct Interrupt {
-// 	Interrupt() : interrupted(false) {};
-// 	void continueSystem() {
-// 		while(!interrupted) {
-// 			//keep running
-// 		}
-// 	}
-// 	atomic<bool> interrupted;
-// };
-
 #ifdef _WIN32
     #include <conio.h>    // for _kbhit() and _getch() on Windows
 #else
@@ -113,19 +103,6 @@ int main() {
     if (enterPressed()) break;  // ✅ non-blocking check for Enter key
 
    }
-	
-
-	// Interrupt interrupt;
-	// thread t(&Interrupt::continueSystem, &interrupt);
-	//cin.ignore(); //clear the newline character from the input buffer
-	//char c;
-
-
-	// while((c = getchar()) != '\n') {
-	// 	//checkFastestRoute();
-	// }
-	// interrupt.interrupted = true;
-	// t.join();
 
 	ostringstream dist;
     dist << fixed << setprecision(0) << BSF;
