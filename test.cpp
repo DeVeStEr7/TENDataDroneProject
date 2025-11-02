@@ -11,7 +11,13 @@
 #include <chrono>
 #include <iomanip>
 #include <algorithm>
-#include <conio.h>
+#ifdef _WIN32
+    #include <conio.h>    // for _kbhit() and _getch() on Windows
+#else
+    #include <termios.h>  // for terminal control on macOS/Linux
+    #include <unistd.h>   // for STDIN_FILENO
+    #include <fcntl.h>    // for fcntl() non-blocking mode
+#endif
 #include <stdio.h>
 
 using namespace std;
@@ -77,6 +83,45 @@ int main() {
 	cin >> filename;
 
 	inFS.open(filename);
+	if (!inFS.is_open()) {
+		cout << "Could not open file " << filename << endl;
+		return 1;
+	}
+
+	getline(inFS,inputData);
+
+	string xInput, yInput;
+	double highestRange = 0;
+	double biggestX = 0.0;
+	double biggestY = 0.0;
+
+    while(!inFS.fail()) {
+        stringstream ss(inputData);
+        while(ss >> xInput >> yInput) {
+            double normalizeXInput = normalize(xInput);
+			double normalizeYInput = normalize(yInput);
+			if (biggestX < normalizeXInput)
+				biggestX = normalizeXInput;
+			if (biggestY < normalizeYInput)
+				biggestY = normalizeYInput;
+
+            xCoords.push_back(normalizeXInput);
+			yCoords.push_back(normalizeYInput);
+        }
+        getline(inFS,inputData);
+    }
+	if (biggestX > biggestY)
+		highestRange = biggestX;
+	else 
+		highestRange = biggestY;
+
+	if ((int)highestRange % 10 != 0)
+		highestRange += 10 - ((int)highestRange % 10);
+
+	inFS.close();
+	
+	cout << "There are " << xCoords.size() << " nodes, computing route..." << endl;
+	cout << "	Shortest Route Discovered So Far" << endl;
 
 	// variable initialization
 	double distance = 0.0;
@@ -109,10 +154,17 @@ int main() {
     fileNameAdjusted = filename.substr(0, filename.find('.'));
 
     dist << fixed << setprecision(0) << BSF;
-	string outputFilename = fileNameAdjusted + "_SOLUTION_" + dist.str() + ".txt";
-	drone.write_route_to_file(outputFilename);
 
-    signalsmith::plot::Plot2D plot;
+	string outputFilename = filename + "_SOLUTION_" + dist.str() + ".txt";
+	drone.write_route_to_file(outputFilename);	
+
+    signalsmith::plot::Plot2D plot(highestRange*4, highestRange*4);
+	plot.x.major(0);
+	plot.y.major(0);
+	for(int i = 0; i <= highestRange; i += 10) {
+		plot.x.minor(i);
+		plot.y.minor(i);
+	}
     vector<int> route = drone.get_route();
 
     
