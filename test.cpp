@@ -123,6 +123,7 @@ int main() {
 	distance = round(drone.nearest_neighbor_distance()*10)/10;
 	cout << "		" << distance << endl;
 	double BSF = distance;
+	string fileNameAdjusted = " ";;
     
 	cin.ignore();
 	srand(time(NULL));
@@ -151,8 +152,10 @@ int main() {
 	// t.join();
 
 	ostringstream dist;
+    fileNameAdjusted = filename.substr(0, filename.find('.'));
+
     dist << fixed << setprecision(0) << BSF;
-	string outputFilename = filename + "_SOLUTION_" + dist.str() + ".txt";
+	string outputFilename = fileNameAdjusted + "_SOLUTION_" + dist.str() + ".txt";
 	drone.write_route_to_file(outputFilename);
 
     signalsmith::plot::Plot2D plot;
@@ -171,7 +174,7 @@ int main() {
     //add creates the lines
     //marker makes the points
 
-	string svgFilename = filename + "_SOLUTION_" + dist.str() + ".svg";
+	string svgFilename = fileNameAdjusted + "_SOLUTION_" + dist.str() + ".svg";
 	plot.write(svgFilename);	
 }
 
