@@ -26,14 +26,42 @@ using namespace std;
 // 	atomic<bool> interrupted;
 // };
 
-int numberCountThrough(vector<double> xCoords, vector<double> yCoords) {
-	int sum = 0;
-	for(int i = 0; i < xCoords.size(); i += 1) {
-		sum += sqrt(pow(xCoords.at(i) - xCoords.at((i+1)%xCoords.size()), 2) + pow(yCoords.at(i) - yCoords.at((i+1)%yCoords.size()), 2));
-	}
-	return sum;
+#ifdef _WIN32
+    #include <conio.h>    // for _kbhit() and _getch() on Windows
+#else
+    #include <termios.h>  // for terminal control on macOS/Linux
+    #include <unistd.h>   // for STDIN_FILENO
+    #include <fcntl.h>    // for fcntl() non-blocking mode
+#endif
+
+bool enterPressed() {
+#ifdef _WIN32
+    if (_kbhit()) {            // check if a key was pressed
+        char c = _getch();     // get the pressed key
+        return c == '\r';      // '\r' is Enter on Windows
+    }
+    return false;
+#else
+    struct termios oldt, newt;
+    int oldf;
+    tcgetattr(STDIN_FILENO, &oldt);         // get current terminal settings
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);       // disable canonical mode and echo
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    oldf = fcntl(STDIN_FILENO, F_GETFL, 0); // get current flags
+    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK); // non-blocking input
+
+    int ch = getchar();                     // try reading a character
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // restore settings
+    fcntl(STDIN_FILENO, F_SETFL, oldf);      // restore flags
+
+    return ch == '\n';  // '\n' is Enter on Unix/macOS
+#endif
 }
 
+
+// changes scientific notation to double
 double normalize(string normalizeInput) {
     double base = stod(normalizeInput.substr(0,normalizeInput.find('e')+1));
     int exponent = stoi(normalizeInput.substr(normalizeInput.find('e')+1));
@@ -45,6 +73,7 @@ double normalize(string normalizeInput) {
 
 int main() {
 
+	// variables initialization	
 	string inputData;
 	string filename;
 	ifstream inFS;
@@ -53,15 +82,19 @@ int main() {
 	vector<double> yCoords;
 	double p = 0.10;
 	
+	// process: files intak
 	cout << "Please input a filename: ";
 	cin >> filename;
 
 	inFS.open(filename);
+
+	// Error check : file opening
 	if (!inFS.is_open()) {
 		cout << "Could not open file " << filename << endl;
 		return 1;
 	}
 
+	// read data from file and organize into x, y coordinate vectors
 	getline(inFS,inputData);
 
 	string xInput, yInput;
@@ -79,31 +112,30 @@ int main() {
 
 	inFS.close();
 	
+	// prints to UI
 	cout << "There are " << xCoords.size() << " nodes, computing route..." << endl;
 	cout << "	Shortest Route Discovered So Far" << endl;
 
+	// variable initialization
 	double distance = 0.0;
 	nearest_neighbor drone;
-	drone.load_data(filename);
+	drone.load_data(filename); // re reads info 
 	distance = round(drone.nearest_neighbor_distance()*10)/10;
 	cout << "		" << distance << endl;
 	double BSF = distance;
     
 	cin.ignore();
 	srand(time(NULL));
-	while(true){
-		double new_distance = round(drone.modified_nearest_neighbor_distance(p)*10)/10;
-		if(new_distance < BSF){
-			BSF = new_distance;
-			cout << "		" << BSF << endl;
-		}
-		if(_kbhit()){
-			char c = _getch();
-			if(c == '\r'){
-				break;
-			}
-		}
-	}
+	while (true) {
+    double new_distance = round(drone.modified_nearest_neighbor_distance(p)*10)/10;
+    if (new_distance < BSF) {
+        BSF = new_distance;
+        cout << "        " << BSF << endl;
+    }
+
+    if (enterPressed()) break;  // ✅ non-blocking check for Enter key
+
+   }
 	
 
 	// Interrupt interrupt;
