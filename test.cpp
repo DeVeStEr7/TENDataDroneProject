@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 using namespace std;
+using namespace std::literals::chrono_literals;
 
 #ifdef _WIN32
     #include <conio.h>    // for _kbhit() and _getch() on Windows
@@ -84,24 +85,42 @@ int main() {
 	drone.load_data(filename); // re reads info 
 	distance = round(drone.nearest_neighbor_distance()*10)/10;
 
+    //get start time of computation
+    auto start = chrono::high_resolution_clock::now();
+
 	// prints to UI
 	cout << "There are " << drone.get_size() << " nodes, computing route..." << endl;
 	cout << "	Shortest Route Discovered So Far" << endl;
 
-	cout << "		" << distance << endl;
+	cout << "		" << distance;
+    
+    //get end time of curr computation
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration = end - start;
+    cout << ", computation time: " << duration.count() << " seconds" << endl;
+
 	double BSF = distance;
 	string fileNameAdjusted = " ";;
     
 	cin.ignore();
 	srand(time(NULL));
-	while (true) {
-    double new_distance = round(drone.modified_nearest_neighbor_distance(p)*10)/10;
-    if (new_distance < BSF) {
-        BSF = new_distance;
-        cout << "        " << BSF << endl;
-    }
 
-    if (enterPressed()) break;  // ✅ non-blocking check for Enter key
+	while (true) {
+
+        double new_distance = round(drone.modified_nearest_neighbor_distance(p)*10)/10;
+
+        if (new_distance < BSF) {
+
+            BSF = new_distance;
+            cout << "        " << BSF;
+
+            // again, get time of computation to print with each new BSF
+            end = chrono::high_resolution_clock::now();
+            duration = end - start;
+            cout << ", computation time: " << duration.count() << " seconds" << endl;
+        }
+
+        if (enterPressed()) {} break;  // ✅ non-blocking check for Enter key
 
    }
 
