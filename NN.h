@@ -137,7 +137,7 @@ void nearest_neighbor::write_route_to_file(const string &filename) {
 
     vector<int> r = get_route(); // get the route vector
     for (int node : r) {         // iterate over the vector
-        fout << node << endl;
+        fout << node +1 << endl;
     }
     
     fout.close();
