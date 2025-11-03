@@ -156,6 +156,8 @@ int main() {
 	drone.write_route_to_file(outputFilename);	
 
     signalsmith::plot::Plot2D plot(highestRange*4, highestRange*4);
+	plot.x.label("X-Axis");
+	plot.y.label("Y-Axis");
 	plot.x.major(0);
 	plot.y.major(0);
 	for(int i = 0; i <= highestRange; i += 10) {
