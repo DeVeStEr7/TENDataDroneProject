@@ -173,6 +173,7 @@ int main() {
         line.marker(xCoords[i],yCoords[i]);
 		line.add(xCoords[i],yCoords[i]);
 	}
+	line.dot(xCoords[route[0]],yCoords[route[0]],4,1);
 	line.add(xCoords[route[route.size()]],yCoords[route[route.size()]]);
 	line2.marker(xCoords[route[0]],yCoords[route[0]]);
 
