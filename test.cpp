@@ -119,9 +119,6 @@ int main() {
 		highestRange += 10 - ((int)highestRange % 10);
 
 	inFS.close();
-	
-	cout << "There are " << xCoords.size() << " nodes, computing route..." << endl;
-	cout << "	Shortest Route Discovered So Far" << endl;
 
 	// variable initialization
 	double distance = 0.0;
@@ -143,10 +140,10 @@ int main() {
     double new_distance = round(drone.modified_nearest_neighbor_distance(p)*10)/10;
     if (new_distance < BSF) {
         BSF = new_distance;
-        cout << "		" << BSF << endl;
+        cout << "        " << BSF << endl;
     }
 
-    if (enterPressed()) break;  
+    if (enterPressed()) break;  // ✅ non-blocking check for Enter key
 
    }
 
