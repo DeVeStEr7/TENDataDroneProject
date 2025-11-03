@@ -158,7 +158,7 @@ int main() {
     signalsmith::plot::Plot2D plot(highestRange*4, highestRange*4);
 	plot.x.major(0);
 	plot.y.major(0);
-	for(int i = 0; i <= 1; i += 10) {
+	for(int i = 0; i <= highestRange; i += 10) {
 		plot.x.minor(i);
 		plot.y.minor(i);
 	}
