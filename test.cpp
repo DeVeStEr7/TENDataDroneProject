@@ -22,24 +22,42 @@
 
 using namespace std;
 
-// struct Interrupt {
-// 	Interrupt() : interrupted(false) {};
-// 	void continueSystem() {
-// 		while(!interrupted) {
-// 			//keep running
-// 		}
-// 	}
-// 	atomic<bool> interrupted;
-// };
+#ifdef _WIN32
+    #include <conio.h>    // for _kbhit() and _getch() on Windows
+#else
+    #include <termios.h>  // for terminal control on macOS/Linux
+    #include <unistd.h>   // for STDIN_FILENO
+    #include <fcntl.h>    // for fcntl() non-blocking mode
+#endif
 
-int numberCountThrough(vector<double> xCoords, vector<double> yCoords) {
-	int sum = 0;
-	for(int i = 0; i < xCoords.size(); i += 1) {
-		sum += sqrt(pow(xCoords.at(i) - xCoords.at((i+1)%xCoords.size()), 2) + pow(yCoords.at(i) - yCoords.at((i+1)%yCoords.size()), 2));
-	}
-	return sum;
+bool enterPressed() {
+#ifdef _WIN32
+    if (_kbhit()) {            // check if a key was pressed
+        char c = _getch();     // get the pressed key
+        return c == '\r';      // '\r' is Enter on Windows
+    }
+    return false;
+#else
+    struct termios oldt, newt;
+    int oldf;
+    tcgetattr(STDIN_FILENO, &oldt);         // get current terminal settings
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);       // disable canonical mode and echo
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    oldf = fcntl(STDIN_FILENO, F_GETFL, 0); // get current flags
+    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK); // non-blocking input
+
+    int ch = getchar();                     // try reading a character
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // restore settings
+    fcntl(STDIN_FILENO, F_SETFL, oldf);      // restore flags
+
+    return ch == '\n';  // '\n' is Enter on Unix/macOS
+#endif
 }
 
+
+// changes scientific notation to double
 double normalize(string normalizeInput) {
     double base = stod(normalizeInput.substr(0,normalizeInput.find('e')+1));
     int exponent = stoi(normalizeInput.substr(normalizeInput.find('e')+1));
@@ -51,6 +69,7 @@ double normalize(string normalizeInput) {
 
 int main() {
 
+	// variables initialization	
 	string inputData;
 	string filename;
 	ifstream inFS;
@@ -59,6 +78,7 @@ int main() {
 	vector<double> yCoords;
 	double p = 0.10;
 	
+	// process: files intak
 	cout << "Please input a filename: ";
 	cin >> filename;
 
@@ -103,100 +123,45 @@ int main() {
 	cout << "There are " << xCoords.size() << " nodes, computing route..." << endl;
 	cout << "	Shortest Route Discovered So Far" << endl;
 
+	// variable initialization
 	double distance = 0.0;
 	nearest_neighbor drone;
-	drone.load_data(filename);
+	drone.load_data(filename); // re reads info 
 	distance = round(drone.nearest_neighbor_distance()*10)/10;
+
+	// prints to UI
+	cout << "There are " << drone.get_size() << " nodes, computing route..." << endl;
+	cout << "	Shortest Route Discovered So Far" << endl;
+
 	cout << "		" << distance << endl;
 	double BSF = distance;
+	string fileNameAdjusted = " ";;
     
 	cin.ignore();
 	srand(time(NULL));
-
-    // --- setup terminal for non-blocking input ---
-	struct termios oldt, newt;
-	tcgetattr(STDIN_FILENO, &oldt);           // save terminal settings
-	newt = oldt;
-	newt.c_lflag &= ~(ICANON | ECHO);         // disable buffering and echo
-	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
-	// make stdin non-blocking
-	int oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
-	fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
-
-	// --- loop to find better routes ---
 	while (true) {
-		double new_distance = round(drone.modified_nearest_neighbor_distance(p) * 10) / 10;
-		if (new_distance < BSF) {
-			BSF = new_distance;
-			cout << "        " << fixed << setprecision(1) << BSF << endl;
-		}
+    double new_distance = round(drone.modified_nearest_neighbor_distance(p)*10)/10;
+    if (new_distance < BSF) {
+        BSF = new_distance;
+        cout << "		" << BSF << endl;
+    }
 
-		int ch = getchar();        // non-blocking
-		if (ch == '\n') break;     // stop when user presses Enter
+    if (enterPressed()) break;  
 
-		this_thread::sleep_for(chrono::milliseconds(50));
-	}
-
-	// --- restore terminal settings ---
-	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);   // restore terminal
-	fcntl(STDIN_FILENO, F_SETFL, oldf);       // restore blocking
-
-	// initscr();             // start ncurses
-    // nodelay(stdscr, TRUE); // non-blocking getch
-    // noecho();
-
-    // while (true) {
-	// 	double new_distance = round(drone.modified_nearest_neighbor_distance(p) * 10) / 10;
-	// 	if (new_distance < BSF) {
-	// 		BSF = new_distance;
-	// 		cout << "        " << BSF << endl;
-	// 	}
-
-	// 	int ch = getch();
-	// 	if (ch == '\n') break; // stop when user presses Enter
-	// 	this_thread::sleep_for(chrono::milliseconds(50)); // small delay to reduce CPU usage
-	// }
-
-    // endwin();
-	
-	
-	// while(true){
-	// 	double new_distance = round(drone.modified_nearest_neighbor_distance(p)*10)/10;
-	// 	if(new_distance < BSF){
-	// 		BSF = new_distance;
-	// 		cout << "		" << BSF << endl;
-	// 	}
-	// 	if(_kbhit()){
-	// 		char c = _getch();
-	// 		if(c == '\r'){
-	// 			break;
-	// 		}
-	// 	}
-	// }
-	
-
-	// Interrupt interrupt;
-	// thread t(&Interrupt::continueSystem, &interrupt);
-	//cin.ignore(); //clear the newline character from the input buffer
-	//char c;
-
-
-	// while((c = getchar()) != '\n') {
-	// 	//checkFastestRoute();
-	// }
-	// interrupt.interrupted = true;
-	// t.join();
+   }
 
 	ostringstream dist;
+    fileNameAdjusted = filename.substr(0, filename.find('.'));
+
     dist << fixed << setprecision(0) << BSF;
+
 	string outputFilename = filename + "_SOLUTION_" + dist.str() + ".txt";
 	drone.write_route_to_file(outputFilename);	
 
     signalsmith::plot::Plot2D plot(highestRange*4, highestRange*4);
 	plot.x.major(0);
 	plot.y.major(0);
-	for(int i = 0; i <= highestRange; i += 10) {
+	for(int i = 0; i <= 1; i += 10) {
 		plot.x.minor(i);
 		plot.y.minor(i);
 	}
@@ -204,18 +169,19 @@ int main() {
 
     
 	auto &line = plot.line();
-	for (int x = 0; x < route.size(); ++x) {
-        int i = route[x];
-        line.marker(xCoords[route[i]],yCoords[route[i]]);
-		line.add(xCoords[route[i]],yCoords[route[i]]);
-	}
+	auto &line2 = plot.line();						//new line for different marker color
 	line.add(xCoords[route[0]],yCoords[route[0]]);
-	line.dot(xCoords[route[0]],yCoords[route[0]], 4,1);
+	for (int x = 1; x < route.size()-1; ++x) {
+        int i = route[x];
+        line.marker(xCoords[i],yCoords[i]);
+		line.add(xCoords[i],yCoords[i]);
+	}
+	line.add(xCoords[route[route.size()]],yCoords[route[route.size()]]);
+	line2.marker(xCoords[route[0]],yCoords[route[0]]);
 
     //add creates the lines
     //marker makes the points
 
-	string svgFilename = filename + "_SOLUTION_" + dist.str() + ".svg";
+	string svgFilename = fileNameAdjusted + "_SOLUTION_" + dist.str() + ".svg";
 	plot.write(svgFilename);	
 }
-
