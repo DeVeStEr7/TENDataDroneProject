@@ -14,6 +14,7 @@ class nearest_neighbor{
         int route[256];
         int bestRouteDistance = 0;
         double charge_point[1][2];
+        double shortest_distance = 1000000;
    
    public:
     nearest_neighbor() : num_trees(0) {}
@@ -224,6 +225,7 @@ double nearest_neighbor::modified_nearest_neighbor_distance(double p) {
             route[i] = temp_route[i];
         }
     }
+    
     
     return total_distance;
 }
