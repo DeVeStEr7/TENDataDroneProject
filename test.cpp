@@ -143,10 +143,10 @@ int main() {
     double new_distance = round(drone.modified_nearest_neighbor_distance(p)*10)/10;
     if (new_distance < BSF) {
         BSF = new_distance;
-        cout << "        " << BSF << endl;
+        cout << "		" << BSF << endl;
     }
 
-    if (enterPressed()) break;  // ✅ non-blocking check for Enter key
+    if (enterPressed()) break;  
 
    }
 
