@@ -38,21 +38,27 @@ vector<int> nearest_neighbor::get_route() const  {
 
 
 void nearest_neighbor::load_data(const string &filename) {
+
     ifstream dataPoints;
     dataPoints.open(filename);
+
     if (!dataPoints) {
+
         cout << "Error with opening file " << endl;
         exit(1); 
     }
     
     num_trees = 0;
     string coordinate_line;
+
     while(getline(dataPoints, coordinate_line)) {
+
         stringstream ss(coordinate_line);
         double x, y;
 
         // Error check : valid file format
         if (!(ss >> x >> y)) {
+
             cout << "Error: Invalid file format" << endl;
             exit(1);
         }
@@ -63,6 +69,7 @@ void nearest_neighbor::load_data(const string &filename) {
         
         // Error check : valid number of locations
         if(num_trees > 256) {
+
             cout << "Error: number of locations is greater than 256" << endl;
             exit(1);
         }
@@ -97,6 +104,7 @@ double nearest_neighbor::nearest_neighbor_distance() {
 
     // process: every tree gets checked and compared with other trees
     for (int i = 1; i < num_trees; ++i) {
+
         int next_tree = -1;
         double minDist = 100000;
 
@@ -147,6 +155,7 @@ void nearest_neighbor::write_route_to_file(const string &filename) {
 
     vector<int> r = get_route(); // get the route vector
     for (int node : r) {         // iterate over the vector
+
         fout << node +1 << endl;
     }
     
@@ -167,6 +176,7 @@ double nearest_neighbor::modified_nearest_neighbor_distance(double p) {
 
     // process: every tree gets checked and compared with other trees
     for (int i = 1; i < num_trees; ++i) {
+
         int bestNextTree1 = -1;  //Indices of the 2 closest trees
         int bestNextTree2 = -1;
 
@@ -220,8 +230,11 @@ double nearest_neighbor::modified_nearest_neighbor_distance(double p) {
 
     // saves route to be official route
     if(bestRouteDistance > total_distance){
+
         bestRouteDistance = total_distance;
+
         for (int i = 0; i <= num_trees; ++i){
+            
             route[i] = temp_route[i];
         }
     }
