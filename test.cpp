@@ -119,9 +119,6 @@ int main() {
 		highestRange += 10 - ((int)highestRange % 10);
 
 	inFS.close();
-	
-	cout << "There are " << xCoords.size() << " nodes, computing route..." << endl;
-	cout << "	Shortest Route Discovered So Far" << endl;
 
 	// variable initialization
 	double distance = 0.0;
@@ -169,13 +166,15 @@ int main() {
 
     
 	auto &line = plot.line();
-	for (int x = 0; x < route.size(); ++x) {
-        int i = route[x];
-        line.marker(xCoords[route[i]],yCoords[route[i]]);
-		line.add(xCoords[route[i]],yCoords[route[i]]);
-	}
+	auto &line2 = plot.line();						//new line for different marker color
 	line.add(xCoords[route[0]],yCoords[route[0]]);
-	line.dot(xCoords[route[0]],yCoords[route[0]], 4,1);
+	for (int x = 1; x < route.size()-1; ++x) {
+        int i = route[x];
+        line.marker(xCoords[i],yCoords[i]);
+		line.add(xCoords[i],yCoords[i]);
+	}
+	line.add(xCoords[route[route.size()]],yCoords[route[route.size()]]);
+	line2.marker(xCoords[route[0]],yCoords[route[0]]);
 
     //add creates the lines
     //marker makes the points
@@ -183,4 +182,3 @@ int main() {
 	string svgFilename = fileNameAdjusted + "_SOLUTION_" + dist.str() + ".svg";
 	plot.write(svgFilename);	
 }
-

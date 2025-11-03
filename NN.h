@@ -12,6 +12,7 @@ class nearest_neighbor{
         int num_trees;
         double coordinates[256][2];
         int route[256];
+        int bestRouteDistance = 0;
         double charge_point[1][2];
         double shortest_distance = 1000000;
    
@@ -128,6 +129,7 @@ double nearest_neighbor::nearest_neighbor_distance() {
     // Return to the start
     total_distance += euclidean(current_tree, 0);
     route[num_trees] = 0;
+    bestRouteDistance = total_distance;
     return total_distance;
 }
 
@@ -215,8 +217,10 @@ double nearest_neighbor::modified_nearest_neighbor_distance(double p) {
     // Return to the start
     total_distance += euclidean(current_tree, 0);
     temp_route[num_trees] = 0;
-    if(total_distance < shortest_distance){
-        shortest_distance = total_distance;
+
+    // saves route to be official route
+    if(bestRouteDistance > total_distance){
+        bestRouteDistance = total_distance;
         for (int i = 0; i <= num_trees; ++i){
             route[i] = temp_route[i];
         }
